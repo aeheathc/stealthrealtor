@@ -1,0 +1,13 @@
+limits:
+    rent-days: 30           #Maximum number of real-life days for a rental.
+    rent-regions: -1        #Maximum number of regions each player can rent at once; Unlimited = -1
+feudal:
+    tax: 0                  #Percentage to be taken from each transaction and go to a ruler instead of the region owner. 0 = no tax; 100 = All proceeds go to the ruler
+    king: NonExistingPlayer #Person recieving tax money for transactions outside any fief
+    fiefs:                  #Array of region names serving as "fiefs" where transactions within them will have their taxes go to the owners of any overlapping fief regions (vassals) instead of the king. The region names here will be matched in any world. Fiefs with no owner will be ignored for taxation purposes.
+    tribute: 0              #Percentage of tax proceeds within fiefs that goes to the king. 0 = Vassal gets all taxes; 100 = King gets all taxes
+    passport-buy: false     #When buying a region in a fief, require a permission node in the form "stealthrealtor.passport.fiefname.buy" or the global override. Used when you have multiple factions and don't want players just buying up land wherever. If a region is in multiple fiefs the buyer will need permission for the fief region having the highest PRIORITY. 
+    passport-rent: false    #See above, replacing "buy" with "rent"
+log:
+    limit: 500              #Maximum number of transactions saved in log for notification purposes.
+    notify-interval: 300    #Number of seconds between transaction notifications; 0 = Disable notifications

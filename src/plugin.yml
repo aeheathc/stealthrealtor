@@ -1,0 +1,47 @@
+name: StealthRealtor
+main: com.aehdev.stealthrealtor.StealthRealtor
+version: 1.0.0
+author: Zolcos
+description: >
+             Command-based system allowing your players
+             to buy plots or rent inn rooms set up by your staff
+             using WorldGuard.
+depend: [Vault, WorldGuard]
+commands:
+  realtor:
+    description: Command for using the buy/rent system 
+    usage: |
+           /<command> - displays command help
+permissions:
+    stealthrealtor.user.*:
+        description: Users can buy, rent, and query.
+        default: true
+        children:
+            stealthrealtor.user.buy: true
+            stealthrealtor.user.rent: true
+            stealthrealtor.user.info: true
+    stealthrealtor.user.buy:
+        description: Allows buying buyable regions.
+    stealthrealtor.user.rent:
+        description: Allows renting rentable regions.
+    stealthrealtor.user.info:
+        description: Allows status querying for available regions, individual known regions, and their own rented regions.
+    stealthrealtor.passport.*:
+        description: Allows buying/renting regions in any fief even without its passport, when require-passport is enabled in the config. The equivalent permission node for an individual fief would be "stealthrealtor.passport.fiefname.*"
+        children:
+            stealthrealtor.passport.buyall: true
+            stealthrealtor.passport.rentall: true
+    stealthrealtor.passport.buyall:
+        description: Allows buying regions in any fief even without its passport, when passport-buy is enabled in the config. The equivalent permission node for an individual fief would be "stealthrealtor.passport.fiefname.buy"
+    stealthrealtor.passport.rentall:
+        description: Allows renting regions in any fief even without its passport, when passport-rent is enabled in the config. The equivalent permission node for an individual fief would be "stealthrealtor.passport.fiefname.rent"
+    stealthrealtor.spy:
+        default: op
+        description: Allows looking up other peoples rented regions.
+    stealthrealtor.reload:
+        default: op
+        description: Allows reloading the plugin.
+    stealthrealtor.force:
+        description: Allows forcing other players into transactions.
+    stealthrealtor.limitless:
+        description: Allows bypassing maximum rent time or concurrent rented regions.

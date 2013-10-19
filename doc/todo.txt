@@ -1,0 +1,3 @@
+== Planned Features ==
+- multi language support
+- tax system?

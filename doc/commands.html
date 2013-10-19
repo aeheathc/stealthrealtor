@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>StealthRealtor Command List</title>
+<style type="text/css">
+span{
+	color:blue;
+}
+dt{
+	margin-top:1em;
+}
+ul{
+	padding-left:1em;
+}
+tt{
+	background-color:#EEE;
+}
+</style>
+</head>
+
+<body>
+<b>Commands:</b> [required] &lt;optional&gt;<br/>
+<dl>
+<dt><b>/realtor</b></dt>
+<dd>Displays a list of player commands</dd>
+
+<dt>/realtor<b> buy [region] &lt;player&gt;</b></dt>
+<dd>Buy a buyable region. The money you pay goes to the current owner, you become the new owner, and the region becomes no longer buyable.<br />
+<span>With permission stealthrealtor.force: If the player argument is supplied, it forces the transaction for another player instead of you.</span> </dd>
+
+<dt>/realtor<b> rent [region] [days] &lt;player&gt;</b></dt>
+<dd>Rent a rentable region for a number of real-life days, if it isn't already being rented. The entire rental cost is paid up front. The money you pay goes to the owner (or if no owner, to the owner of the parent region), and you become a member for the duration of your rent. Use this on a region you currently rent to extend it by the given number of days.<br />
+<span>With permission stealthrealtor.force: If the player argument is supplied, it forces the transaction for another player instead of you</span>.</dd>
+
+<dt>/realtor<b> info [region]</b></dt>
+<dd>List everything StealthRealtor knows about this region including time left on current rental and its interpretation of the flags.<br />
+Also, if there is any inconsistency between the region and database regarding rentals, the info command will fix it and log what it did.
+</dd>
+
+<dt>/realtor<b> list available &lt;buy|rent&gt;</b></dt>
+<dd>List all regions available to buy or rent.</dd>
+
+<dt>/realtor<b> list within [region] &lt;buy|rent&gt;</b></dt>
+<dd>List all regions available to buy or rent that physically overlap or are contained by the named region. Useful when there are a lot and you want to look locally.</dd>
+
+<dt>/realtor<b> list rented &lt;player&gt;</b></dt>
+<dd>List regions you are currently renting.<br />
+<span>With permission stealthrealtor.spy: If the player argument is supplied, you can see another player's current rentals.</span></dd>
+
+<dt>/realtor<b> reload</b></dt>
+<dd>Reload the plugin.<br />
+<span>Requires permission stealthrealtor.reload</span>
+
+<dt>/realtor<b> version</b></dt>
+<dd>Show curent version.<br />
+</dd>
+</dl>
+<p><b>How to set up regions for buying and renting:</b><br />
+In WorldGuard, set the 'buyable' flag for regions to be sold outright. Non-buyable regions will be considered rentable instead. Then set the 'price' flag -- for buyable regions this is just the price, but for rentable regions this is the per-day cost of renting.</p>
+<p>Set the region owner to determine who will recieve the money. For rentable regions, you can leave it blank and set the owner of the parent region instead, that way you can have an &quot;Inn&quot; region owned by the proprietor, parent to all the rooms, and not have to set the owner each time.</p>
+<p>But either way you MUST have an owner defined somewhere so the plugin knows who to give the money to. Otherwise it will not allow anyone to buy or rent it. If you really want the money to go to nobody, you can enter a fictitious name.</p>
+</body></html>
