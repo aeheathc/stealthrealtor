@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.joda.time.Duration;
 
@@ -167,15 +168,16 @@ public class Search
 	 * @param dbescape if true, call the database escaping function on each player name before putting it into the string
 	 * @return the string serialization
 	 */
-	public static String serializePayeeList(Map<String, Double> payees, boolean dbescape)
+	public static String serializePayeeList(Map<OfflinePlayer, Double> payees, boolean dbescape)
 	{
 		StringBuilder out = new StringBuilder();
-		for(String player : payees.keySet())
+		for(OfflinePlayer player : payees.keySet())
 		{
-			if(dbescape) player = db.escape(player);
+			String playerName = player.getName();
+			if(dbescape) playerName = db.escape(playerName);
 			double amount = payees.get(player);
 			out.append('[');
-			out.append(player);
+			out.append(playerName);
 			out.append(',');
 			out.append(amount);
 			out.append(']');
@@ -189,7 +191,7 @@ public class Search
 	 * @param payees the payees
 	 * @return the string
 	 */
-	public static String serializePayeeList(Map<String, Double> payees)
+	public static String serializePayeeList(Map<OfflinePlayer, Double> payees)
 	{
 		return serializePayeeList(payees, false);
 	}

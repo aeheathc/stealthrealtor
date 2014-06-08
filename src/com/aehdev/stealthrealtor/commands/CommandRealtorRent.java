@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -12,6 +13,7 @@ import java.util.Set;
 import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -257,7 +259,7 @@ public class CommandRealtorRent extends Command
 		}
 		
 		//check if the buyer can afford it
-		double balance = plugin.econ.getBalance(buyerName);
+		double balance = plugin.econ.getBalance(buyer);
 		if(totalPrice > balance)
 		{
 			sender.sendMessage("Renter can't afford this rental");
@@ -268,13 +270,15 @@ public class CommandRealtorRent extends Command
 		double tax = (Config.TAX_PERCENT/100) * totalPrice;
 		double sellersTotal = totalPrice - tax;
 		double sellersEach = sellersTotal / sellers.size();
-		HashMap<String, Set<String>> vassals = new HashMap<String, Set<String>>(); //maps the names of all applicable fiefs having owners (vassals) to a list of vassal names 
+		HashMap<String, Set<OfflinePlayer>> vassals = new HashMap<String, Set<OfflinePlayer>>(); //maps the names of all applicable fiefs having owners (vassals) to a list of vassals 
 		//go through all the applicable fiefs and store just the ones having vassals, and under each one store all its vassal names
 		for(ProtectedRegion fief : fiefs)
 		{
-			Set<String> fiefVassals = fief.getOwners().getPlayers();
-			if(fiefVassals.size() > 0)
+			Set<String> fiefVassalNames = fief.getOwners().getPlayers();
+			if(fiefVassalNames.size() > 0)
 			{
+				Set<OfflinePlayer> fiefVassals = new HashSet<OfflinePlayer>();
+				for(String fiefVassalName : fiefVassalNames) fiefVassals.add(Bukkit.getServer().getOfflinePlayer(fiefVassalName));
 				vassals.put(fief.getId(), fiefVassals);
 			}
 		}
@@ -294,23 +298,23 @@ public class CommandRealtorRent extends Command
 			fiefsEach = vassalsTotal / vassals.size();
 		}
 		//now take the per-fief tax money, and for each fief, split it among its vassals
-		HashMap<String, Double> vassalsEach = new HashMap<String, Double>();
+		HashMap<OfflinePlayer, Double> vassalsEach = new HashMap<OfflinePlayer, Double>();
 		for(String fief : vassals.keySet())
 		{
-			Set<String> fiefVassals = vassals.get(fief);
+			Set<OfflinePlayer> fiefVassals = vassals.get(fief);
 			int vassalCount = fiefVassals.size();
 			double fiefVassalsEach = fiefsEach / vassalCount;
-			for(String vassal : fiefVassals)
+			for(OfflinePlayer vassal : fiefVassals)
 			{
 				vassalsEach.put(vassal, fiefVassalsEach);
 			}
 		}
 		
 		//execute the transfers
-		HashMap<String, Double> payments = new HashMap<String, Double>(); //this is just here to help us easily roll back if something goes wrong
-		if(plugin.econ.withdrawPlayer(buyerName, totalPrice).transactionSuccess())
+		HashMap<OfflinePlayer, Double> payments = new HashMap<OfflinePlayer, Double>(); //this is just here to help us easily roll back if something goes wrong
+		if(plugin.econ.withdrawPlayer(buyer, totalPrice).transactionSuccess())
 		{
-			payments.put(buyerName, -totalPrice);
+			payments.put(buyer, -totalPrice);
 		}else{
 			player.sendMessage("Vault error taking payment: could not complete transaction.");
 			log.warning(String.format((Locale)null,"[%s] Vault error getting money from buyer %s. (Ending state OK)", StealthRealtor.pdfFile.getName(), buyer));
@@ -321,9 +325,10 @@ public class CommandRealtorRent extends Command
 		{
 			for(String seller : sellers)
 			{
-				if(plugin.econ.depositPlayer(seller, sellersEach).transactionSuccess())
+				OfflinePlayer sellerObj = Bukkit.getServer().getOfflinePlayer(seller);
+				if(plugin.econ.depositPlayer(sellerObj, sellersEach).transactionSuccess())
 				{
-					payments.put(seller, sellersEach);
+					payments.put(sellerObj, sellersEach);
 				}else{
 					player.sendMessage("Vault error paying seller: could not complete transaction.");
 					rollback(payments, "paying seller " + seller);
@@ -334,9 +339,10 @@ public class CommandRealtorRent extends Command
 		
 		if(king > 0)
 		{
-			if(plugin.econ.depositPlayer(Config.KING, king).transactionSuccess())
+			OfflinePlayer kingObj = Bukkit.getServer().getOfflinePlayer(Config.KING);
+			if(plugin.econ.depositPlayer(kingObj, king).transactionSuccess())
 			{
-				payments.put(Config.KING, king);
+				payments.put(kingObj, king);
 			}else{
 				player.sendMessage("Vault error paying tax: could not complete transaction.");
 				rollback(payments, "paying tribute to king " + king);
@@ -346,7 +352,7 @@ public class CommandRealtorRent extends Command
 		
 		if(vassalsTotal > 0)
 		{
-			for(String vassal : vassalsEach.keySet())
+			for(OfflinePlayer vassal : vassalsEach.keySet())
 			{
 				double vassalTax = vassalsEach.get(vassal);
 				if(plugin.econ.depositPlayer(vassal, vassalTax).transactionSuccess())
@@ -414,10 +420,10 @@ public class CommandRealtorRent extends Command
 		return true;
 	}
 	
-	private void rollback(HashMap<String, Double> payments, String action, boolean vault)
+	private void rollback(HashMap<OfflinePlayer, Double> payments, String action, boolean vault)
 	{
-		HashMap<String, Double> failures = new HashMap<String, Double>();
-		for(String player : payments.keySet())
+		HashMap<OfflinePlayer, Double> failures = new HashMap<OfflinePlayer, Double>();
+		for(OfflinePlayer player : payments.keySet())
 		{
 			double amount = payments.get(player);
 			EconomyResponse res = null;
@@ -439,7 +445,7 @@ public class CommandRealtorRent extends Command
 		}
 	}
 	
-	private void rollback(HashMap<String, Double> payments, String action)
+	private void rollback(HashMap<OfflinePlayer, Double> payments, String action)
 	{
 		rollback(payments, action, true);
 	}

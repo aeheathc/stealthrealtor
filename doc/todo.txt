@@ -1,3 +1,4 @@
 == Planned Features ==
 - multi language support
 - tax system?
+- track players using UUID instead of name. This can only really be done once WorldGuard can give region owners/members as UUID 
